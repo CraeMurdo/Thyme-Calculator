@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commission Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: #3052c1;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .form-container {
+            text-align: left;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        label, select, input, button {
+            margin: 10px 0;
+            display: block;
+            width: 100%;
+        }
+        button {
+            background-color: white;
+            color: #3052c1;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #d4d4d4;
+        }
+        img {
+            width: 120px;
+            height: auto;
+        }
+        .result {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        async function convertToGBP(amount, currency) {
+            try {
+                const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${currency}`);
+                const data = await response.json();
+                return amount * (data.rates.GBP || 1);
+            } catch (error) {
+                alert("Error fetching exchange rates. Please try again later.");
+                return amount;
+            }
+        }
+
+        async function calculateCommission() {
+            const dealValue = parseFloat(document.getElementById("dealValue").value);
+            const currency = document.getElementById("currency").value;
+            
+            if (isNaN(dealValue) || dealValue <= 0) {
+                alert("Please enter a valid deal value.");
+                return;
+            }
+            
+            const gbpValue = await convertToGBP(dealValue, currency);
+            const remainingValue = gbpValue * 0.7;
+            const commission = remainingValue * 0.15;
+            
+            document.getElementById("result").innerHTML = `
+                <strong>Converted to GBP:</strong> £${gbpValue.toFixed(2)}<br>
+                <strong>70% Deal Value:</strong> £${remainingValue.toFixed(2)}<br>
+                <strong>Commission (15% of remaining):</strong> £${commission.toFixed(2)}
+            `;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <img src="https://images.squarespace-cdn.com/content/v1/64ea41b94ecae5283b9bf258/37442733-eb13-47d3-a907-6624c8f2ce83/Heading+%282%29.png?format=1500w" 
+             alt="Thyme Logo">
+        <div class="form-container">
+            <h2>Commission Calculator</h2>
+            <label for="dealValue">Deal Value:</label>
+            <input type="number" id="dealValue" placeholder="Enter deal amount" required>
+            
+            <label for="currency">Currency:</label>
+            <select id="currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+            </select>
+            
+            <button onclick="calculateCommission()">Calculate</button>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+</body>
+</html>
